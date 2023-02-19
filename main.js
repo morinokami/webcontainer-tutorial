@@ -8,6 +8,10 @@ let webcontainerInstance;
 window.addEventListener('load', async () => {
   textareaEl.value = files['index.js'].file.contents;
 
+  textareaEl.addEventListener('input', (e) => {
+    writeIndexJS(e.currentTarget.value);
+  });
+
   // Call only once
   webcontainerInstance = await WebContainer.boot();
   await webcontainerInstance.mount(files);
@@ -41,6 +45,12 @@ async function startDevServer() {
     iframeEl.src = url;
   });
 }
+
+/** @param {string} content*/
+async function writeIndexJS(content) {
+  await webcontainerInstance.fs.writeFile('/index.js', content);
+};
+
 
 document.querySelector('#app').innerHTML = `
   <div class="container">
