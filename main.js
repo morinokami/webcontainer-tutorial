@@ -12,9 +12,23 @@ window.addEventListener('load', async () => {
   webcontainerInstance = await WebContainer.boot();
   await webcontainerInstance.mount(files);
 
-  const packageJSON = await webcontainerInstance.fs.readFile('package.json', 'utf-8');
-  console.log(packageJSON);
+  const exitCode = await installDependencies();
+  if (exitCode !== 0) {
+    throw new Error('Installation failed');
+  };
 });
+
+async function installDependencies() {
+  // Install dependencies
+  const installProcess = await webcontainerInstance.spawn('npm', ['install']);
+  installProcess.output.pipeTo(new WritableStream({
+    write(data) {
+      console.log(data);
+    }
+  }));
+  // Wait for install command to exit
+  return installProcess.exit;
+}
 
 document.querySelector('#app').innerHTML = `
   <div class="container">
