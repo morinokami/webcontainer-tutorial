@@ -16,6 +16,8 @@ window.addEventListener('load', async () => {
   if (exitCode !== 0) {
     throw new Error('Installation failed');
   };
+
+  startDevServer();
 });
 
 async function installDependencies() {
@@ -28,6 +30,16 @@ async function installDependencies() {
   }));
   // Wait for install command to exit
   return installProcess.exit;
+}
+
+async function startDevServer() {
+  // Run `npm run start` to start the Express app
+  await webcontainerInstance.spawn('npm', ['run', 'start']);
+
+  // Wait for `server-ready` event
+  webcontainerInstance.on('server-ready', (port, url) => {
+    iframeEl.src = url;
+  });
 }
 
 document.querySelector('#app').innerHTML = `
